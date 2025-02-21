@@ -1,0 +1,15 @@
+apiVersion: security.istio.io/v1
+kind: AuthorizationPolicy
+metadata:
+  name: ext-authz
+spec:
+  action: CUSTOM
+  provider:
+    name: auth-server # not implemented
+  rules:
+  - to:
+    - operation:
+        hosts:
+        - static-predictor-static-predictor.dts-deployments.svc.cluster.local:8000
+        paths:
+        - /api/v1.0/predictions

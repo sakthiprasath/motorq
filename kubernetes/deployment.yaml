@@ -1,0 +1,34 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: conference-api-deployment
+  labels:
+    app: conference-api
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: conference-api
+  template:
+    metadata:
+      labels:
+        app: conference-api
+    spec:
+      containers:
+      - name: conference-api
+#        image: local:5000/motorq_task:latest
+        image: k3d-myregistry.local:5000/motorq_task:latest
+        ports:
+        - containerPort: 5000
+        envFrom:
+        - configMapRef:
+            name: conference-api-config
+        - secretRef:
+            name: conference-api-secret
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "500m"
+          limits:
+            memory: "512Mi"
+            cpu: "1"

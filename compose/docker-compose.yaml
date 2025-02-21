@@ -1,0 +1,36 @@
+version: '3.8'
+
+services:
+  motorq_task:
+    build:
+      context: .  # Dockerfile location (current directory)
+      dockerfile: Dockerfile
+    image: motorq_task:latest
+    container_name: motorq_task_container
+    ports:  # Map ports if needed, e.g., if using gunicorn on port 8000
+      - "8000:8000"
+    volumes:  # Bind-mount the application code for development purposes (optional)
+      - ./src:/app/src
+      - ./configs:/app/configs
+    environment:  # Specify any environment variables if required
+      - PYTHONPATH=/app
+    networks:
+      - motorq_network
+  postgres:
+    image: postgres:13
+    container_name: postgres_db
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=test_db
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    networks:
+      - motorq_network
+networks:
+  motorq_network:
+    driver: bridge
+volumes:
+  postgres_data: { }
