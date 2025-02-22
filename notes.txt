@@ -1,7 +1,6 @@
+----------------------Docker section-------------------------
 docker build -t motorq_task .
-docker-compose up -d
-
-
+# docker-compose up -d
 docker run -d \
   --name postgres_db \
   -e POSTGRES_USER=postgres \
@@ -11,42 +10,44 @@ docker run -d \
   -p 5432:5432 \
   postgres:13
 
+To test if the container is working as expected
+    docker exec -it <docker-container-tag> bash
+    curl http://localhost:5000/api/conferences/1
+
+
 docker run -e DB_NAME=test_db -e DB_USER=postgres -e DB_PASSWORD=postgres -e DB_HOST=localhost -e DB_PORT=5432 motorq_task
 
 
+---------------------------create k3d cluster ---------------------------------
 
-curl http://localhost:5000/api/conferences/1
+1. k3d cluster create mycluster --servers 1 --agents 2
+2. kubectl get nodes
+3. To import the docker image motor_task:latest into krd cluster
+     Method 1:
+        k3d image import motorq_task:latest --cluster mycluster
+        To list the docker images:
+            docker exec -it k3d-mycluster-server-0 crictl images
+     Method 2:
+        (creating registry)
+        k3d cluster create mycluster --registry-use k3d-myregistry.local:5000
+        k3d node list
+        k3d registry create myregistry.local --port 5000
+        docker exec -it k3d-mycluster-server-0 sh
+        vi /etc/rancher/k3s/registries.yaml
+        ADD => mirrors:
+          "k3d-myregistry.local:5000":
+            endpoint:
+              - "http://k3d-myregistry.local:5000"
 
+        docker build -t k3d-myregistry.local:5000/motorq_task:latest .
 
-k3d cluster create mycluster --servers 1 --agents 2
-kubectl get nodes
-# k3d image import motorq_task:latest --cluster mycluster
-docker exec -it k3d-mycluster-server-0 crictl images
-
-
-
---------crate registry:
-k3d registry create myregistry.local --port 5000
-k3d cluster create mycluster --registry-use k3d-myregistry.local:5000
-k3d node list
-docker exec -it k3d-mycluster-server-0 sh
-vi /etc/rancher/k3s/registries.yaml
-
-ADD => mirrors:
-  "k3d-myregistry.local:5000":
-    endpoint:
-      - "http://k3d-myregistry.local:5000"
-
-docker build -t k3d-myregistry.local:5000/conference-api:latest .
-
-# docker tag motorq_task:latest k3d-myregistry.local:5000/motorq_task:latest
-# docker push k3d-myregistry.local:5000/motorq_task:latest
-
-docker tag motorq_task:latest localhost:5000/motorq_task:latest
-docker push localhost:5000/motorq_task:latest
+        # tried this way also
+        # docker tag motorq_task:latest k3d-myregistry.local:5000/motorq_task:latest
+        # docker push k3d-myregistry.local:5000/motorq_task:latest
 
 
-#-------istio
+
+-------------------------------istio-------------------------------Optional
 curl -L https://istio.io/downloadIstio | ISTIO_VERSION=1.22.2 sh -
 cd istio-1.22.2
 export PATH=$PWD/bin:$PATH
@@ -57,17 +58,20 @@ kubectl label namespace seldon-system istio-injection=enabled
 
 
 
-
-
-
-
-
-
-
-
+----------------------------Deploy the app/service/secret/config_map----------------------------
 kubectl apply -f deployment.yaml
 kubectl apply -f service.yaml
 kubectl apply -f configmap.yaml
 kubectl apply -f secret.yaml
 
+
+----------------------------delete the deployment----------------------------
 kubectl delete deployment conference-api-deployment
+
+
+
+----------------------------------------------------------------------------------------------------------------
+
+
+
+
