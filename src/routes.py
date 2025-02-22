@@ -22,41 +22,6 @@ conferences = {
 lock = threading.Lock()  # Use a lock for thread safety
 
 
-# Endpoint to book a seat at a conference
-# @conference_booking_route.route('<int:conference_id>/book', methods=['POST'])
-# def book_conference(conference_id):
-#     with lock:  # Lock to handle concurrency
-#         conference = conferences.get(conference_id)
-#         if not conference:
-#             return jsonify({"error": "Conference not found"}), 404
-#
-#         if conference["booked_seats"] >= conference["seats"]:
-#             return jsonify({"error": "No seats available"}), 400
-#
-#         # Simulate booking processing (e.g., check payment or something)
-#         asyncio.run(asyncio.sleep(2))  # Simulating an async task
-#
-#         # Book a seat
-#         conference["booked_seats"] += 1
-#         return jsonify({
-#             "message": f"Seat booked successfully for {conference['name']}",
-#             "conference": conference
-#         })
-
-
-# # Endpoint to check availability of a conference
-# @conference_booking_route.route('<int:conference_id>', methods=['GET'])
-# def check_conference(conference_id):
-#     conference = conferences.get(conference_id)
-#     app_logger = _registry.get('app_logger')
-#     app_logger.debug("test statement")
-#
-#     if not conference:
-#         return jsonify({"error": "Conference not found"}), 404
-#     return jsonify(conference)
-
-
-
 @conference_booking_route.route('book', methods=['POST'])
 def book_slot():
     data = request.get_json(force=True)

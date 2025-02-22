@@ -4,6 +4,6 @@ metadata:
   name: conference-api-config
 data:
   FLASK_ENV: production
-  DB_HOST: postgres-db
-  DB_NAME: conference_db
-  DB_USER: conference_user
+  DB_HOST: postgres_db
+  DB_NAME: test_db
+  DB_USER: postgres

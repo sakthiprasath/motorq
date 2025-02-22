@@ -59,10 +59,16 @@ kubectl label namespace seldon-system istio-injection=enabled
 
 
 ----------------------------Deploy the app/service/secret/config_map----------------------------
-kubectl apply -f deployment.yaml
-kubectl apply -f service.yaml
-kubectl apply -f configmap.yaml
-kubectl apply -f secret.yaml
+#----- install kubectl if not already present
+1. curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/darwin/amd64/kubectl"
+2. chmod +x ./kubectl
+3. sudo mv ./kubectl /usr/local/bin/kubectl
+
+To create the deployments the
+1. kubectl apply -f deployment.yaml
+2. kubectl apply -f service.yaml
+3. kubectl apply -f configmap.yaml
+4. kubectl apply -f secret.yaml
 
 
 ----------------------------delete the deployment----------------------------
