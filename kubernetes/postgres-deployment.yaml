@@ -1,0 +1,47 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: conference-db-deployment
+  labels:
+    app: conference-db
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: conference-db
+  template:
+    metadata:
+      labels:
+        app: conference-db
+    spec:
+      containers:
+      - name: conference-db
+        image: postgres:13
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 5432
+        env:
+        - name: POSTGRES_DB
+          value: mydatabase # Replace with your actual database name
+        - name: POSTGRES_USER
+          value: myuser # Replace with your actual database user
+        - name: POSTGRES_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: conference-db-secret # Change this with the actual secret name if different
+              key: postgres-password
+        volumeMounts:
+        - name: postgres-data
+          mountPath: /var/lib/postgresql/data
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "500m"
+          limits:
+            memory: "512Mi"
+            cpu: "1"
+      volumes:
+      - name: postgres-data
+        persistentVolumeClaim:
+          claimName: postgres-pvc # You need to create a PVC with this name or refer to an existing one

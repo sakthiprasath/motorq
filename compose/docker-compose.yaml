@@ -8,12 +8,18 @@ services:
     image: motorq_task:latest
     container_name: motorq_task_container
     ports:  # Map ports if needed, e.g., if using gunicorn on port 8000
-      - "8000:8000"
+      - "5000:5000"
     volumes:  # Bind-mount the application code for development purposes (optional)
       - ./src:/app/src
       - ./configs:/app/configs
     environment:  # Specify any environment variables if required
       - PYTHONPATH=/app
+      - DB_NAME=test_db
+      - DB_USER=postgres
+      - DB_PASSWORD=postgres
+      - DB_HOST=postgres
+      - DB_PORT=5432
+    working_dir: /app
     networks:
       - motorq_network
   postgres:

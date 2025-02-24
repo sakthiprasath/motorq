@@ -1,3 +1,5 @@
+import traceback
+
 from flask import Flask, request, jsonify
 
 import logging
@@ -6,6 +8,8 @@ import yaml
 from logger import Logger
 from routes import conference_booking_route
 from flask_smorest import Api
+
+from utils.exceptions import ValidationException
 from utils.registry import _registry
 
 app = Flask(__name__)
@@ -28,11 +32,13 @@ def setup_logging(app_name, log_level):
     return app_logger
 
 
-def load_config():
-    config_file = 'configs/config.yaml'
-    with open(config_file, 'r') as f:
-        configs = yaml.safe_load(f)
-    return configs
+# def load_config():
+#     import os
+#     print("os.getcwd():", os.getcwd())
+#     config_file = '/app/configs/config.yaml'
+#     with open(config_file, 'r') as f:
+#         configs = yaml.safe_load(f)
+#     return configs
 
 
 def initialise_api_docs(app):
@@ -49,9 +55,22 @@ def set_routes(app):
 def initialise_app_context():
     _registry.add('app_logger', app_logger)
 
-    configs = load_config()
-    _registry.add('app_config', configs)
-    app_logger.debug(configs)
+    # configs = load_config()
+    # _registry.add('app_config', configs)
+    # app_logger.debug(configs)
+
+@app.errorhandler(Exception)
+def handle_error(e):
+    app_logger.error(traceback.format_exc())
+    status_code = 500
+    msg = "Server Error"
+    reason = ''
+    if isinstance(e, ValidationException):
+        status_code = 400
+        msg = e.message
+    err_msg = {"status_code": status_code, "msg": msg,
+               'reason': reason}
+    return jsonify(err_msg), status_code
 
 def list_routes(app):
     for rule in app.url_map.iter_rules():

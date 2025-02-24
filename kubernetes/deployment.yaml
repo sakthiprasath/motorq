@@ -5,7 +5,7 @@ metadata:
   labels:
     app: conference-api
 spec:
-  replicas: 3
+  replicas: 1
   selector:
     matchLabels:
       app: conference-api
@@ -16,8 +16,9 @@ spec:
     spec:
       containers:
       - name: conference-api
-#        image: local:5000/motorq_task:latest
-        image: k3d-myregistry.local:5000/motorq_task:latest
+#        image: local:5000/conference-api:latest
+        image: motorq_task
+        imagePullPolicy: IfNotPresent
         ports:
         - containerPort: 5000
         envFrom:

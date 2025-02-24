@@ -1,6 +1,6 @@
 import psycopg2
 from psycopg2.extras import RealDictCursor
-from utils.exceptions import ValidationException
+from utils.exceptions import ValidationException, ApplicationException
 import os
 
 class ConferencesManager:
@@ -32,10 +32,10 @@ class ConferencesManager:
                 slot = cursor.fetchone()
 
                 if not slot:
-                    return ValidationException({'error': 'Slot not found'}), 404
+                    raise ValidationException(message={'error': 'Slot not found'})
 
                 if slot['available_slots'] <= 0:
-                    return ValidationException({'error': 'No available slots'}), 400
+                    raise ValidationException(message={'error': 'No available slots'})
 
                 # Step 2: Insert booking
                 cursor.execute(
@@ -59,7 +59,7 @@ class ConferencesManager:
             }
         except Exception as e:
             conn.rollback()
-            return jsonify({'error': str(e)}), 500
+            raise e
         finally:
             conn.close()
 
@@ -81,6 +81,30 @@ class ConferencesManager:
             raise e
         finally:
             conn.close()
+
+    def add_conference_slot(self, conference_id, slot_time, available_slots, capacity):
+        conn = self.get_db_connection()
+        cur = conn.cursor()
+
+        # Insert the new conference slot
+        insert_query = """
+                            INSERT INTO conference_slots (conference_id, slot_time, capacity, available_slots)
+                            VALUES (%s, %s, %s, %s)
+                            RETURNING slot_id, created_at
+                        """
+
+        cur.execute(insert_query, (conference_id, slot_time, capacity, available_slots))
+        slot = cur.fetchone()
+
+        conn.commit()
+        cur.close()
+        conn.close()
+
+        return {
+            'slot_id': slot[0],
+            'created_at': slot[1],
+            'message': 'Conference slot created successfully'
+        }
 
     def get_conferences(self):
         query = "SELECT * FROM conferences ORDER BY start_date"

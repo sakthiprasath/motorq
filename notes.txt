@@ -1,5 +1,7 @@
 ----------------------Docker section-------------------------
+
 docker build -t motorq_task .
+
 # docker-compose up -d
 docker run -d \
   --name postgres_db \
@@ -18,9 +20,10 @@ To test if the container is working as expected
 docker run -e DB_NAME=test_db -e DB_USER=postgres -e DB_PASSWORD=postgres -e DB_HOST=localhost -e DB_PORT=5432 motorq_task
 
 
+
 ---------------------------create k3d cluster ---------------------------------
 
-1. k3d cluster create mycluster --servers 1 --agents 2
+1. k3d cluster create mycluster --servers 1 --agents 2 --network motorq_network
 2. kubectl get nodes
 3. To import the docker image motor_task:latest into krd cluster
      Method 1:
@@ -65,10 +68,11 @@ kubectl label namespace seldon-system istio-injection=enabled
 3. sudo mv ./kubectl /usr/local/bin/kubectl
 
 To create the deployments the
-1. kubectl apply -f deployment.yaml
-2. kubectl apply -f service.yaml
-3. kubectl apply -f configmap.yaml
-4. kubectl apply -f secret.yaml
+1. kubectl apply -f deployment.yaml --namespace motorq
+2. kubectl apply -f service.yaml --namespace motorq
+3. kubectl apply -f configmap.yaml --namespace motorq
+4. kubectl apply -f secret.yaml --namespace motorq
+5. kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/main/deploy/static/provider/kind/deploy.yaml
 
 
 ----------------------------delete the deployment----------------------------
@@ -79,5 +83,6 @@ kubectl delete deployment conference-api-deployment
 ----------------------------------------------------------------------------------------------------------------
 
 
-
-
+Debugging commands
+    kubectl describe pod conference-api-deployment-588b47bd76-mhmtw --namespace motorq
+    kubectl exec -it conference-api-deployment-bbfd7dc74-9s2cj -n motorq -- /bin/bash

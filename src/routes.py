@@ -32,7 +32,7 @@ def book_slot():
     conferences_manager = ConferencesManager()
     res = conferences_manager.book(user_id, slot_id, conference_id)
 
-    return res, 201
+    return res
 
 
 @conference_booking_route.route('', methods=['POST'])
@@ -58,6 +58,24 @@ def add_conference():
         }), 201
     except Exception as e:
         return jsonify({'error': str(e)}), 500
+
+
+@conference_booking_route.route('slots', methods=['POST'])
+def create_conference_slot():
+    data = request.json
+
+    # Extract values from request body
+    conference_id = data.get('conference_id')
+    slot_time = data.get('slot_time')
+    capacity = data.get('capacity')
+    available_slots = data.get('available_slots')
+
+    if not conference_id or not slot_time or not capacity or available_slots is None:
+        return jsonify({'error': 'Missing required fields'}), 400
+
+    conferences_manager = ConferencesManager()
+    res = conferences_manager.add_conference_slot(conference_id, slot_time, available_slots, capacity)
+    return res
 
 
 @conference_booking_route.route('', methods=['GET'])
