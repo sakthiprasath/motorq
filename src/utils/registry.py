@@ -1,3 +1,4 @@
+from utils.exceptions import NotFoundException, ValidationException
 
 
 class Registry:

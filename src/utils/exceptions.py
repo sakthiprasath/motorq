@@ -12,6 +12,19 @@ class ApplicationException(Exception):
         self.reason = reason
 
 
+class NotFoundException(ApplicationException):
+    """
+    Indicates an entity is not found.
+
+    Equivalent of HTTP not found (404)
+
+    Sample entities include tenant, dataset, asset and channel
+    """
+    def __init__(self, message, reason=''):
+        ApplicationException.__init__(self, message)
+        self.reason = reason
+
+
 class ValidationException(ApplicationException):
     """
     Indicates a problem with client input

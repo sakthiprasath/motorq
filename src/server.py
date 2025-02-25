@@ -7,9 +7,10 @@ import yaml
 
 from logger import Logger
 from routes import conference_booking_route
+from auth_manager import auth_route
 from flask_smorest import Api
 
-from utils.exceptions import ValidationException
+from utils.exceptions import ValidationException, ApplicationException
 from utils.registry import _registry
 
 app = Flask(__name__)
@@ -41,6 +42,7 @@ def setup_logging(app_name, log_level):
 #     return configs
 
 
+
 def initialise_api_docs(app):
     app.config['OPENAPI_VERSION'] = '3.0.2'
     app.config['API_TITLE'] = 'conference API Server'
@@ -50,14 +52,10 @@ def initialise_api_docs(app):
 def set_routes(app):
     api = Api(app)
     api.register_blueprint(conference_booking_route)
-
+    api.register_blueprint(auth_route)
 
 def initialise_app_context():
-    _registry.add('app_logger', app_logger)
-
-    # configs = load_config()
-    # _registry.add('app_config', configs)
-    # app_logger.debug(configs)
+    _registry.replace('app_logger', app_logger)
 
 @app.errorhandler(Exception)
 def handle_error(e):
@@ -68,8 +66,14 @@ def handle_error(e):
     if isinstance(e, ValidationException):
         status_code = 400
         msg = e.message
-    err_msg = {"status_code": status_code, "msg": msg,
-               'reason': reason}
+    if isinstance(e, ApplicationException):
+        msg = e.message
+        status_code = 400
+    if isinstance(e, ValueError):
+        msg = str(e)
+        status_code = 400
+
+    err_msg = {"status_code": status_code, "msg": msg}
     return jsonify(err_msg), status_code
 
 def list_routes(app):
@@ -79,7 +83,7 @@ def list_routes(app):
 
 def initialise(app):
     app_logger = setup_logging('conference-api', logging.DEBUG)
-
+    _registry.replace("app_logger", app_logger)
     initialise_app_context()
     initialise_api_docs(app)
 

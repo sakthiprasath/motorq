@@ -1,6 +1,7 @@
 # Use an official lightweight Python image.
 # https://hub.docker.com/_/python
-FROM python:3.9-slim  as base
+FROM python:3.9-slim as base
+
 ENV DEBIAN_FRONTEND=noninteractive
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
@@ -20,6 +21,8 @@ RUN pip install --no-cache-dir -r requirements.txt
 # COPY . .
 
 COPY src /app
+RUN mkdir /app/db
+COPY db /app/db
 COPY run_with_gunicorn.sh /app
 ENV PYTHONPATH /app
 RUN mkdir /app/configs

@@ -5,6 +5,7 @@ metadata:
   namespace: motorq
 data:
   FLASK_ENV: production
-  DB_HOST: conference-db
+  #  DB_HOST: conference-db-service:5432
+  DB_HOST: conference-db-service.motorq.svc.cluster.local
   DB_NAME: test_db
   DB_USER: postgres

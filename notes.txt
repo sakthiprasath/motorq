@@ -23,19 +23,19 @@ docker run -e DB_NAME=test_db -e DB_USER=postgres -e DB_PASSWORD=postgres -e DB_
 
 ---------------------------create k3d cluster ---------------------------------
 
-1. k3d cluster create mycluster --servers 1 --agents 2 --network motorq_network
+1. k3d cluster create mycluster-1 --servers 1 --agents 2 --network motorq_network
 2. kubectl get nodes
 3. To import the docker image motor_task:latest into krd cluster
      Method 1:
-        k3d image import motorq_task:latest --cluster mycluster
+        k3d image import motorq_task:latest --cluster mycluster-1
         To list the docker images:
-            docker exec -it k3d-mycluster-server-0 crictl images
+            docker exec -it k3d-mycluster-1-server-0 crictl images
      Method 2:
         (creating registry)
-        k3d cluster create mycluster --registry-use k3d-myregistry.local:5000
+        k3d cluster create mycluster-1 --registry-use k3d-myregistry.local:5000
         k3d node list
         k3d registry create myregistry.local --port 5000
-        docker exec -it k3d-mycluster-server-0 sh
+        docker exec -it k3d-mycluster-1-server-0 sh
         vi /etc/rancher/k3s/registries.yaml
         ADD => mirrors:
           "k3d-myregistry.local:5000":
@@ -74,7 +74,8 @@ To create the deployments the
 4. kubectl apply -f secret.yaml --namespace motorq
 5. kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/main/deploy/static/provider/kind/deploy.yaml
 
-
+6. Port forwarding for a deployment
+    kubectl port-forward svc/conference-api-service 80:9999 -n motorq
 ----------------------------delete the deployment----------------------------
 kubectl delete deployment conference-api-deployment
 
@@ -86,3 +87,4 @@ kubectl delete deployment conference-api-deployment
 Debugging commands
     kubectl describe pod conference-api-deployment-588b47bd76-mhmtw --namespace motorq
     kubectl exec -it conference-api-deployment-bbfd7dc74-9s2cj -n motorq -- /bin/bash
+

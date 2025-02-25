@@ -9,4 +9,4 @@ spec:
   resources:
     requests:
       storage: 200Mi            # The amount of storage you are requesting
-  storageClassName: standard  # The StorageClass to use, or remove this line to use the default
+  storageClassName: local-path  # The StorageClass to use, or remove this line to use the default

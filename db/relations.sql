@@ -1,4 +1,4 @@
-CREATE TABLE conferences (
+CREATE TABLE IF NOT EXISTS conferences(
     conference_id SERIAL PRIMARY KEY,
     name VARCHAR(255) NOT NULL,
     description TEXT,
@@ -6,9 +6,14 @@ CREATE TABLE conferences (
     start_date DATE NOT NULL,
     end_date DATE NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE (name, start_date, end_date)
 );
-CREATE TABLE conference_slots (
+ALTER TABLE conferences
+ADD CONSTRAINT unique_conference_details UNIQUE (name, start_date, end_date);
+
+
+CREATE TABLE IF NOT EXISTS conference_slots (
     slot_id SERIAL PRIMARY KEY,
     conference_id INT NOT NULL,
     slot_time TIMESTAMP NOT NULL,
@@ -16,10 +21,15 @@ CREATE TABLE conference_slots (
     available_slots INT NOT NULL CHECK (available_slots >= 0),
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (conference_id) REFERENCES conferences(conference_id) ON DELETE CASCADE
+    FOREIGN KEY (conference_id) REFERENCES conferences(conference_id) ON DELETE CASCADE,
+    UNIQUE (conference_id, slot_time)
 );
 
-CREATE TABLE bookings (
+ALTER TABLE conference_slots
+ADD CONSTRAINT unique_conference_id_slot_time UNIQUE (conference_id, slot_time);
+
+
+CREATE TABLE IF NOT EXISTS bookings (
     booking_id SERIAL PRIMARY KEY,
     slot_id INT NOT NULL,
     user_id INT NOT NULL,
@@ -31,14 +41,13 @@ CREATE TABLE bookings (
     FOREIGN KEY (conference_id) REFERENCES conferences(conference_id)
 );
 
-CREATE TABLE users (
+CREATE TABLE IF NOT EXISTS users (
     user_id SERIAL PRIMARY KEY,
     name VARCHAR(255) NOT NULL,
     email VARCHAR(255) UNIQUE NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
-
 
 
 CREATE OR REPLACE FUNCTION decrease_available_slots()
@@ -57,7 +66,6 @@ FOR EACH ROW
 WHEN (NEW.booking_status = 'booked')
 EXECUTE FUNCTION decrease_available_slots();
 
-
 CREATE OR REPLACE FUNCTION increase_available_slots()
 RETURNS TRIGGER AS $$
 BEGIN
@@ -73,4 +81,18 @@ AFTER UPDATE ON bookings
 FOR EACH ROW
 WHEN (OLD.booking_status = 'booked' AND NEW.booking_status = 'canceled')
 EXECUTE FUNCTION increase_available_slots();
+
+
+CREATE TABLE users_new (
+    id SERIAL PRIMARY KEY,
+    username VARCHAR(50) UNIQUE NOT NULL,
+    password VARCHAR(200) NOT NULL
+);
+
+CREATE TABLE tokens (
+    id SERIAL PRIMARY KEY,
+    user_id INTEGER REFERENCES users_new(id),
+    token TEXT NOT NULL,
+    expires_at TIMESTAMP NOT NULL
+);
 

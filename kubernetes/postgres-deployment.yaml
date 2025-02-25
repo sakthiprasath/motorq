@@ -23,14 +23,14 @@ spec:
         - containerPort: 5432
         env:
         - name: POSTGRES_DB
-          value: mydatabase # Replace with your actual database name
+          value: test_db # Replace with your actual database name
         - name: POSTGRES_USER
-          value: myuser # Replace with your actual database user
+          value: postgres # Replace with your actual database user
         - name: POSTGRES_PASSWORD
           valueFrom:
             secretKeyRef:
-              name: conference-db-secret # Change this with the actual secret name if different
-              key: postgres-password
+              name: conference-api-secret # Change this with the actual secret name if different
+              key: DB_PASSWORD
         volumeMounts:
         - name: postgres-data
           mountPath: /var/lib/postgresql/data
