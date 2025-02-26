@@ -1,7 +1,7 @@
 import asyncpg
 import bcrypt
 from flask import Flask, request, jsonify
-from itsdangerous import TimedJSONWebSignatureSerializer as Serializer
+import jwt
 from datetime import datetime, timedelta
 from flask_smorest import Blueprint
 import os
@@ -38,18 +38,24 @@ def check_password(hashed_password, password):
 
 # Generate token with 2 min expiration
 def generate_token(user_id):
-    s = Serializer(get_secret_key(), expires_in=300)  # Expires in 2 minutes (120s)
-    return s.dumps({'user_id': user_id}).decode('utf-8')
+    secret_key = get_secret_key()
+    payload = {
+        'user_id': user_id,
+        # Expires in 5 minutes (300s)
+        'exp': datetime.utcnow() + timedelta(seconds=300)
+    }
+    token = jwt.encode(payload, secret_key, algorithm='HS256')
+    return token
 
 
 # Validate token
-def validate_token(token):
-    s = Serializer(get_secret_key())
-    try:
-        data = s.loads(token)
-        return data['user_id']
-    except Exception:
-        return None
+# def validate_token(token):
+#     s = Serializer(get_secret_key())
+#     try:
+#         data = s.loads(token)
+#         return data['user_id']
+#     except Exception:
+#         return None
 
 async def validate_token_and_get_user_id(token):
     conn = await get_db_connection()

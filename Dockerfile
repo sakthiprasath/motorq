@@ -14,8 +14,12 @@ WORKDIR /app
 # Copy the dependencies file to the working directory
 COPY requirements.txt .
 
+# Check if the requirements.txt file is copied correctly
+RUN ls -l /app/requirements.txt
+
 # Install any dependencies
-RUN pip install --no-cache-dir -r requirements.txt
+RUN pip install --upgrade pip setuptools
+RUN pip install  -r requirements.txt --no-cache-dir
 
 # # Copy the contents of the local src directory to the working directory
 # COPY . .

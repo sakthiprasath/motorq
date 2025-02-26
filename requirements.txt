@@ -1,3 +1,4 @@
+# itsdangerous
 Flask==2.0.1
 flask_smorest==0.34.0
 PyYAML==5.4.1
@@ -6,3 +7,7 @@ gevent==23.9.1
 psycopg2-binary==2.9.10
 asyncpg==0.30.0
 Flask[async]==2.0.1
+bcrypt==4.2.1
+PyJWT==2.1.0
+
+

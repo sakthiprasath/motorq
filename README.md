@@ -27,3 +27,10 @@
     docker run -e DB_NAME=test_db -e DB_USER=postgres -e DB_PASSWORD=postgres -e DB_HOST=localhost -e DB_PORT=5432 motorq_task
     ```
 11. Please refer the ```notes.txt``` for ```kubernetes``` section
+
+
+
+---------------
+- user gunicorn for multithreading workers 
+- used async await to utilise the event loop asynchronization
+- used thread safe row locking in the db level

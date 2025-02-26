@@ -282,7 +282,7 @@ class ConferencesManager:
 
 
 class InitDb:
-    SQL_FILE_PATH = "../db/relations.sql"
+    SQL_FILE_PATH = "db/relations.sql"
     def execute_sql_file(self, conn, path):
         """
         Executes the SQL statements in the given file.
